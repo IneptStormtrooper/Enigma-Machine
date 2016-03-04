@@ -15,6 +15,10 @@ Specifications for config file:
     2) The second line specifies the host
 
 """
+#TODO
+# think of good way to add plugboard settings to config
+# clean up runner
+
 def client_mode(machine, server):
     print("Acting as client")
     serverName= server

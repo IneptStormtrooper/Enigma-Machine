@@ -1,21 +1,20 @@
 """
-This replicates an enigma Machine as used by the germans during ww2. It can encrypt and decrypt strings with the proper tumblers
+This replicates an enigma Machine as used by the germans during ww2.
+It can encrypt and decrypt strings with the proper tumblers.
 When inputting a string for encryption/decryption it will assume the first n (where n is the number of tumblers)
  characters are used for setting the initial tumbler rotation, as how it was done with german machines
- Does not rely on specific tmblers or settings as they must all be inputted by the user, giving more security to the device
+ Does not rely on specific tumblers or settings as they must all be inputted by the user,
+  giving more security to the device
 """
 
 
-# TO DO:
+# TODO:
 #
-# implement plug Board functionality
 # add function to add plug Board settings after initializing machine
 
 import enigmaTumbler
 
 class enigmaMachine:
-
-
 
     """
     tumblerList -> a list of enigmaTumblers
@@ -29,16 +28,27 @@ class enigmaMachine:
     def __str__(self):
         i = ""
         for item in self.tumblerList:
-            i+=str(item)
-            i+=" "
+            i += str(item)
+            i += " "
         return i
+
+    def __doPlugBoard(self, string):
+        retString = ""
+        for loc, char in enumerate(string):
+            try:
+                retString += self.plugBoard[char]
+            except KeyError:
+                retString += string[loc]
+        return retString
+
 
     # takes in a string to encrypt and returns the encrypted string
     # after the process is finished it resets the tumblers for the next encryption / decryption
     def encrypt(self, encryptString):
         retString = ""
-
-        for location, char in enumerate(encryptString):  # loop over decryptString and pass each char into tumblers to decrypt it
+        encryptString = self.__doPlugBoard(encryptString)
+        # loop over decryptString and pass each char into tumblers to decrypt it
+        for location, char in enumerate(encryptString):
             if location == len(self.tumblerList):# change tumbler settings based on first n letters
                 self.setTumblerRotation(retString)
             for tumbler in self.tumblerList:    # loop through tumblers forward
@@ -64,7 +74,8 @@ class enigmaMachine:
     # after the process is finished it resets the tumblers for the next encryption / decryption
     def decrypt(self, decryptString):
         retString = ""
-        for location, char in enumerate(decryptString):  # loop over decryptString and pass each char into tumblers to decrypt it
+         # loop over decryptString and pass each char into tumblers to decrypt it
+        for location, char in enumerate(decryptString):
             if location == 3:
                 self.setTumblerRotation(decryptString[:3])
             for tumbler in self.tumblerList:    # loop through tumblers forward
@@ -81,19 +92,23 @@ class enigmaMachine:
                 try:
                     if (tumbler.getRotSetting() == tumbler.getRotLoc()) and count != len(self.tumblerList):
                         self.tumblerList[count].increment()
-                except(TypeError):
+                except TypeError:
                     if (tumbler.getRotSetting() in tumbler.getRotLoc()) and count != len(self.tumblerList):
                         self.tumblerList[count].increment()
 
             retString+=char # combine all decrypted chars into retString
         for tumbler in self.tumblerList:    # resets all the tumblers in the machine to original setting
             tumbler.reset()
+
+        retString = self.__doPlugBoard(retString)
         return retString    # return finished string leaving off the first 3 characters which aren't part of message
 
     # creates and then adds an enigmaTumbler to the list of tumblers the machine uses
     """
-    substitutionString -> (string) containing the randomized alphabet the Tumbler uses when calculating encryption/decryption chars
-    rotationLoc -> a (list of ints) donoting position(s) of where the tumbler will rotate the next tumbler in the sequence
+    substitutionString -> (string) containing the randomized alphabet the
+        Tumbler uses when calculating encryption/decryption chars
+    rotationLoc -> a (list of ints) donoting position(s) of where the
+        tumbler will rotate the next tumbler in the sequence
     rotationSetting -> (int) starting rotation position of the tumbler
         this value is saved in origSetting to allow tumbler to be reset after each encryption/decryption
     """
@@ -113,16 +128,18 @@ def main():
     tmb2 = enigmaTumbler.enigmaTumbler("aektp.iyvmcfzqlrnsw odbxhguj", 4, 0)
     tmb3 = enigmaTumbler.enigmaTumbler("uigefkxmoy.dhlcnwptrzbav qjs", 0, 0)
 
-    machine = enigmaMachine([tmb2, tmb3, tmb1])
+    machine = enigmaMachine([tmb2, tmb3, tmb1], {"l":"a","a":"l"})
 
     print(machine.encrypt("hello world"))
     print("")
     print(machine.decrypt(machine.encrypt("hello world")))
 
 
-    print(machine.encrypt("still testing to see if the machine still works for extra long strings that will cause the tumblers to turn"))
-    print("")
-    print(machine.decrypt("mryfwveica xdzcthmxiemxerbkkzvjtnpikcumjgy bfmxexpyzppucv wtpwkcukzrlfhjqs  zmykbisyclvereeulhdmqzmvnl .l.g"))
+    #print(machine.encrypt("still testing to see if the machine still works
+    # for extra long strings that will cause the tumblers to turn"))
+    #print("")
+    #print(machine.decrypt("mryfwveica xdzcthmxiemxerbkkzvjtnpikcumjgy
+    # bfmxexpyzppucv wtpwkcukzrlfhjqs  zmykbisyclvereeulhdmqzmvnl .l.g"))
 
 
 if __name__ == "__main__":
