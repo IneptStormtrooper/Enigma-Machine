@@ -69,20 +69,24 @@ def server_mode(machine):
 
 def main():
     machine = enigmaMachine()
-    clientMode = True
+
     fileName = sys.argv[1]
     file = open(fileName, 'r')
     f = file.read().split("\n")
-    host = f[1]
-    if f[0] == "server":
-        clientMode = False
-    del f[0]
-    del f[0]
+    clientTF = f[0] # check if client mode or server mode
+    host = f[1] # host destination for client mode
+    f = f[2:] # delete the first two lines
+
+    # compose dictionary
+    dictionary = f[0]
+    for item in dictionary.split("n"):
+        machine.addPlufBoard(item)
+    # compose tumblers
     for line in f:
         info = line.split(", ")
         machine.addTumbler(info[0], info[1].split(" "), info[2])
 
-    if clientMode:
+    if clientTF == "client":
         client_mode(machine, host)
     else:
         server_mode(machine)

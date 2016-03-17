@@ -9,8 +9,7 @@ When inputting a string for encryption/decryption it will assume the first n (wh
 
 
 # TODO:
-#
-# add function to add plug Board settings after initializing machine
+# Nothing currently
 
 import enigmaTumbler
 
@@ -121,6 +120,15 @@ class enigmaMachine:
     def setTumblerRotation(self, charSettings):
         for loc, tumbler in enumerate(self.tumblerList):
             tumbler.setRotSetting(charSettings[loc])
+
+    """
+        paramater setting is a string of 2 characters
+        they are the in and out settings for the pludboard
+        they are added in both directions so doing "al" is equivalent to both "al" and "la"
+    """
+    def addPlufBoard(self, setting):
+        self.plugBoard[setting[0]] = setting[1]
+        self.plugBoard[setting[1]] = setting[0]
 
 
 def main():
