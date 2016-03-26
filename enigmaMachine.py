@@ -40,6 +40,42 @@ class enigmaMachine:
                 retString += string[loc]
         return retString
 
+    # takes 2 parameters, returns encrypted char
+    # char - character to be encrypted
+    # direction - T / F; True = forward, False = reverse
+    def doTumblers(self, char, direction):
+        if direction:
+            for tumbler in self.tumblerList:    # loop through tumblers forward
+                char  = tumbler.getEncryptChar(char)
+        else:
+            for tumbler in reversed(self.tumblerList):  # loop backward to mimic reflector plate in enigma
+                char  = tumbler.getEncryptChar(char)
+        return char
+
+    # takes 2 parameters, returns decrypted char
+    # char - character to be decrypted
+    # direction - T / F; True = forward, False = reverse
+    def undoTumblers(self, char, direction):
+        if direction:
+            for tumbler in self.tumblerList:    # loop through tumblers forward
+                char  = tumbler.getDecryptChar(char)
+        else:
+            for tumbler in reversed(self.tumblerList):  # loop backward to mimic reflector plate in enigma
+                char  = tumbler.getDecryptChar(char)
+        return char
+
+    # see if any other tumbler can be incremented based on rotationSetting of previous tumbler
+    # take no parameters, returns nothing
+    def incrementTumblers(self):
+        self.tumblerList[0].increment()     # rotate first tumbler by one
+        for count, tumbler in enumerate(self.tumblerList):
+
+            try:    # try if one one item in rotation settings
+                if (tumbler.getRotSetting() == tumbler.getRotLoc()) and count != len(self.tumblerList):
+                    self.tumblerList[count].increment()
+            except TypeError:   # error means it has a list of settings and use that
+                if (tumbler.getRotSetting() in tumbler.getRotLoc()) and count != len(self.tumblerList):
+                    self.tumblerList[count].increment()
 
     # takes in a string to encrypt and returns the encrypted string
     # after the process is finished it resets the tumblers for the next encryption / decryption
@@ -50,21 +86,17 @@ class enigmaMachine:
         for location, char in enumerate(encryptString):
             if location == len(self.tumblerList):# change tumbler settings based on first n letters
                 self.setTumblerRotation(retString)
-            for tumbler in self.tumblerList:    # loop through tumblers forward
-                char = tumbler.getEncryptChar(char)
+
+            char = self.doTumblers(char, True)
 
             char = self.tumblerList[0].flip(char)
 
-            for tumbler in reversed(self.tumblerList):  # loop backward to mimic reflector plate in enigma
-                char = tumbler.getEncryptChar(char)
+            char = self.doTumblers(char, False)
 
-            self.tumblerList[0].increment()     # rotate first tumbler by one
-            for count, tumbler in enumerate(self.tumblerList):
-                # see if any other tumbler can be incremented based on rotationSetting of previous tumbler
-                if (tumbler.rotSetting == tumbler.rotLoc) and count != len(self.tumblerList):
-                        self.tumblerList[count].increment()
+            #self.tumblerList[0].increment()     # rotate first tumbler by one
+            self.incrementTumblers()
+            retString+=char             # combine all decrypted chars into retString
 
-            retString+=char # combine all decrypted chars into retString
         for tumbler in self.tumblerList:    # resets all the tumblers in the machine to original setting
             tumbler.reset()
         return retString
@@ -77,25 +109,17 @@ class enigmaMachine:
         for location, char in enumerate(decryptString):
             if location == 3:
                 self.setTumblerRotation(decryptString[:3])
-            for tumbler in self.tumblerList:    # loop through tumblers forward
-                char = tumbler.getDecryptChar(char)
+
+            char = self.undoTumblers(char, True)
 
             char = self.tumblerList[0].flip(char)
 
-            for tumbler in reversed(self.tumblerList):  # loop backward to mimic reflector plate in enigma
-                char = tumbler.getDecryptChar(char)
+            char = self.undoTumblers(char, False)
 
-            self.tumblerList[0].increment()     # rotate first tumbler by one
-            for count, tumbler in enumerate(self.tumblerList):
-                # see if any other tumbler can be incremented based on rotationSetting of previous tumbler
-                try:
-                    if (tumbler.getRotSetting() == tumbler.getRotLoc()) and count != len(self.tumblerList):
-                        self.tumblerList[count].increment()
-                except TypeError:
-                    if (tumbler.getRotSetting() in tumbler.getRotLoc()) and count != len(self.tumblerList):
-                        self.tumblerList[count].increment()
-
+            #self.tumblerList[0].increment()     # rotate first tumbler by one
+            self.incrementTumblers()
             retString+=char # combine all decrypted chars into retString
+
         for tumbler in self.tumblerList:    # resets all the tumblers in the machine to original setting
             tumbler.reset()
 
@@ -142,12 +166,11 @@ def main():
     print("")
     print(machine.decrypt(machine.encrypt("hello world")))
 
+    print("")
 
-    #print(machine.encrypt("still testing to see if the machine still works
-    # for extra long strings that will cause the tumblers to turn"))
-    #print("")
-    #print(machine.decrypt("mryfwveica xdzcthmxiemxerbkkzvjtnpikcumjgy
-    # bfmxexpyzppucv wtpwkcukzrlfhjqs  zmykbisyclvereeulhdmqzmvnl .l.g"))
+    print(machine.encrypt("still testing to see if the machine still works for extra long strings that will cause the tumblers to turn"))
+    print("")
+    print(machine.decrypt("mryisveica xdzcthmxiemxerbkkzqjtnpikcum.hy bfmxexpyzppucq stpwkcukzrlfhjqg  zmoabibyclvereeulhdbqzmvnl .l.g"))
 
 
 if __name__ == "__main__":
